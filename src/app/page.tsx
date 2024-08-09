@@ -1,113 +1,87 @@
-import Image from "next/image";
+"use client"
+
+import axios from "axios";
+import { useState, useEffect } from "react";
+import AchievementsSection from "./components/AchivementSection";
+import ExperienceSection from "./components/Experience";
+import Header from "./components/Header";
+import ProjectsSection from "./components/ProjectSection";
+import UserInfo from "./components/UserInfo";
+import { API_BASE_URL } from "./constants";
+import { Certification } from "./interfaces/cerfication.interface";
+import { Experience } from "./interfaces/experience.interface";
+import { Hackathon } from "./interfaces/hackathon.interface";
+import { Project } from "./interfaces/project.interface";
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+  const [profileImage, setProfileImage] = useState<string>('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqArH_IkLI5NxAG-tvvAIE_3XhaOG_X0N5Ig&s');
+    const [bannerImage, setBannerImage] = useState<string>('https://static8.depositphotos.com/1008191/989/i/450/depositphotos_9899389-stock-photo-white-banner-background.jpg');
+    const [name, setName] = useState<string>('John Doe');
+    const [email, setEmail] = useState<string>('john.doe@example.com');
+    const [githubLink, setGithubLink] = useState<string>('');
+    const [linkedinLink, setLinkedinLink] = useState<string>('');
+    const [experiences, setExperiences] = useState<Experience[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [hackathons, setHackathons] = useState<Hackathon[]>([]);
+    const [certifications, setCertifications] = useState<Certification[]>([]);
+    const [showAlert, setShowAlert] = useState<boolean>(false)
+    const [apiCalled, setApiCalled] = useState<boolean>(false)
 
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+    useEffect(() => {
+        const queryString = window.location.search;
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+        // Create a URLSearchParams object from the query string
+        const urlParams = new URLSearchParams(queryString);
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+        // Get the value of the 'name' parameter
+        const name = urlParams.get('name');
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
+        if (name === null) {
+            setShowAlert(true)
+        }
+        else {
+            setName(name);
+            setEmail(`${name}@gmail.com`)
+        }
+        if (apiCalled === false) {
+            console.log(API_BASE_URL)
+            axios.get(`${API_BASE_URL}/profiles/${name}`).then(response => {
+                const profileData = response.data;
+                setExperiences(profileData.experiences);
+                setProjects(profileData.projects);
+                setHackathons(profileData.hackathons);
+                setCertifications(profileData.certifications);
+                setGithubLink(profileData.socials?.github)
+                setLinkedinLink(profileData.socials?.linkedin)
+            });
+            setApiCalled(true)
+            console.log(experiences)
+        }
+    }, [apiCalled]);
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+    if (showAlert) {
+        return <>
+            <div className="prompt">
+                <p>Please add a <strong>name</strong> in following format at the end of string <code>?name=name</code> to the URL to proceed further.</p>
+            </div>
+        </>
+    }
+
+    return (
+        <>
+            <div className="max-w-screen-lg mx-auto p-4">
+                <Header bannerImage={bannerImage} email={email} name={name} profileImage={profileImage} setBannerImage={setBannerImage} setProfileImage={setProfileImage} />
+                <UserInfo githubLink={githubLink} setGithubLink={setGithubLink} linkedinLink={linkedinLink} setLinkedinLink={setLinkedinLink} name={name} />
+                <ExperienceSection experiences={experiences} setExperiences={setExperiences} name={name} />
+                <ProjectsSection projects={projects} setProjects={setProjects} name={name} />
+                <AchievementsSection
+                    hackathons={hackathons}
+                    certifications={certifications}
+                    setHackathons={setHackathons}
+                    setCertifications={setCertifications}
+                    name={name}
+                />
+            </div>
+        </>
+    );
 }
